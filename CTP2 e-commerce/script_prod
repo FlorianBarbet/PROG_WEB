@@ -1,0 +1,17 @@
+DROP TABLE IF EXISTS produits;
+
+CREATE TABLE produits(
+
+	id serial,
+	libelle text,
+	prix numeric(6,2),
+			CONSTRAINT pk_Produits PRIMARY KEY(id),
+			CONSTRAINT check_price CHECK(prix > 0.00)
+);
+
+INSERT INTO produits (libelle,prix) VALUES 
+('Console',620.39),
+('Computer',1750.90),
+('Souris',2.99),
+('Stylo',0.50);
+					

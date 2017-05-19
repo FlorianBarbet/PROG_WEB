@@ -1,0 +1,19 @@
+DROP TABLE IF EXISTS commande;
+
+CREATE TABLE commande(
+
+	idfacture serial,
+	dat date DEFAULT now(),
+	id integer,
+	qute integer,
+
+	CONSTRAINT pk_commande PRIMARY KEY(idfacture),
+	CONSTRAINT fk_produits FOREIGN KEY (id)
+		REFERENCES produits(id)
+			ON UPDATE CASCADE
+			ON DELETE CASCADE,
+	CONSTRAINT check_qute CHECK(qute >= 0)
+
+);
+
+

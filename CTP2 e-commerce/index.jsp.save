@@ -1,0 +1,149 @@
+<%@ page pageEncoding="UTF-8" %>
+<%@ page import="java.sql.*"  %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.util.Map" %>
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+		<title>Ma page</title>
+		<style>
+			.redbann{
+				background-color: red;
+				color:#fff;
+				text-align:center;
+			}
+			
+
+		</style>
+	</head>
+	<body >
+
+	
+<!-- 
+	A) Recuperation du panier ( et creation le cas écheant ) 
+-->	
+<% 
+		
+		int prixTT=0;
+		Map<String,Integer> mesProduits;
+		Map<String,String> lib;
+
+		if(session.getAttribute("lib")==null){
+			lib=new HashMap<String,String>();
+		}else{
+			lib=(Map<String,String>)session.getAttribute("lib");
+		}
+
+		if(session.getAttribute("prod")==null)
+			mesProduits = new HashMap<String,Integer>();  
+		else{
+			mesProduits=(Map<String,Integer>)session.getAttribute("prod");
+		}
+/*
+<!-- 
+	B) Recuperation du paramètre si il existe et ajout au panier + redirection ci dessous 
+-->
+*/
+		String tmp;
+		if((tmp=request.getParameter("id"))!=null){
+
+				if(mesProduits.get(tmp)==null)
+					mesProduits.put(tmp,1);
+				else
+					mesProduits.put(tmp,mesProduits.get(tmp)+1);
+
+				session.setAttribute("prod",mesProduits);
+			}
+			
+%>
+<!--
+	 A) Recuperation du panier ( et creation le cas écheant ) ci dessus 
+-->
+		
+
+		<h2 class="redbann"> Votre panier : <a href="index.jsp?clear=yes">clear</a></h2>
+
+		<table class="table">
+			<tr>
+				<th>Libelle</th><th>Quantité</th>
+			</tr>
+<!-- 
+	C ) affichage du panier avec libelles ci dessous
+-->
+<%
+		for(String id : mesProduits.keySet()){
+%>
+			<tr>
+				<td><%=lib.get(id)%></td><td><%=mesProduits.get(id)%></td>
+			</tr>
+<%
+		}		
+%>
+				
+		
+		</table>
+		<h2 class="redbann">Les articles proposés sont : </h2>
+		
+		<table class="table">
+			<tr>		
+				<th>Libelle</th><th>Prix</th> 
+			<tr/>
+
+<% 
+	Connection con = null;
+
+		try{
+
+		    Class.forName("org.postgresql.Driver");
+			String url = "jdbc:postgresql://localhost/yourDB";
+			String nom = "login";
+			String mdp = "changeit";
+			con = DriverManager.getConnection(url,nom,mdp);
+
+			Statement stmt = con.createStatement();
+			stmt = con.createStatement();
+
+			String query = "select libelle,prix,id from produits";
+			ResultSet rs = stmt.executeQuery(query);
+			
+			while(rs.next()){
+%>		
+<!-- 
+	D) affichage du panier avec libelles 
+-->		
+			<tr>
+				<td><a href=index.jsp?id=<%=rs.getString("id")%> ><%=rs.getString("libelle")%></a></td><td><%=rs.getString("prix")%></td>
+			</tr>
+
+
+<%
+			lib.put(rs.getString("id"),rs.getString("libelle"));
+			session.setAttribute("lib",lib);
+			
+		
+			}
+
+		}catch (Exception e) {
+%> <h1>Oups ! ( <%= e.getMessage() %> )</h1> <%
+		}
+		finally {	  
+			try{
+				con.close();	  
+			}catch (Exception e) {
+%><h1>Oups ! (<%= e.getMessage() %>)</h1><%
+			}
+		}
+if(request.getParameter("clear")!=null){
+			session.invalidate();
+			response.sendRedirect("../tpcontrol/index.jsp");
+		
+		}
+%>
+		</table>
+		
+		<a href="index.jsp?clear=yes" class="btn">remise à zero</a>
+
+	</body>
+</html>
